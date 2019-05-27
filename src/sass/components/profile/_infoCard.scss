@@ -1,0 +1,110 @@
+.profileInfoCard {
+	padding: 1em;
+	margin-bottom: 1em;
+	background-color: #fff;
+	border-radius: .5em;
+	box-shadow: 0 0 1em 0 rgba(#000, .05);
+
+	// .profileInfoCard_header
+	&_header {
+		font-weight: 700;
+		font-size: 2em;
+		margin-bottom: .75em;
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		line-height: 1;
+
+		.md-icon {
+			color: $primary-color;
+			font-size: 1em;
+			margin-right: .5em;
+			flex-shrink: 0;
+			line-height: 1;
+		}
+
+		.title {
+			flex-shrink: 1;
+			font-size: 1em;
+			color: $black;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			text-align: left;
+			line-height: 1;
+		}
+
+		.action {
+			font-size: 1rem;
+			margin-left: 1em;
+			&_item {
+				color: $primary-color;
+				cursor: pointer;
+				&:hover {
+					text-decoration: underline;
+				}
+			}
+		}
+
+	}
+
+	// .profileInfoCard_instruction
+	&_instruction {
+		color: $gray-400;
+	}
+
+	// .profileInfoCard_actions
+	&_actions {
+		margin-top: .5em;
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		flex-wrap: wrap;
+		> .iBttn:not(:last-child) {
+			margin-right: .5em;
+		}
+	}
+
+
+}
+
+// ============================================
+// COMPONENTS : infoField
+// ============================================
+.profileInfoCard .infoField {
+	font-size: 1em;
+	padding: 1em;
+
+	// .infoField_key
+	&_key {
+		font-weight: normal;
+		color: $primary-color;
+		font-size: .8em;
+		margin-top: 0;
+		margin-bottom: .25;
+		line-height: 1;
+	}
+	// .infoField_value
+	&_value {
+		margin-bottom: 0;
+		margin-top: 0;
+		font-size: 1.25em;
+		min-height: 1em;
+		line-height: 1;
+		color: $black;
+		font-weight: 600;
+	}
+
+
+	&:nth-child(odd) {
+		background-color: lighten($primary-color, 39%);
+	}
+}
+
+// ============================================
+// COMPONENTS : iTable
+// ============================================
+.profileInfoCard .iTable {
+	margin-bottom: 4rem;
+}

@@ -1,0 +1,30 @@
+{
+  "name": "internlink",
+  "version": 2,
+  "routes": [
+    {
+      "src": "^/service-worker.js$",
+      "dest": "/_next/static/service-worker.js",
+      "headers": {
+        "cache-control": "public, max-age=43200, immutable",
+        "Service-Worker-Allowed": "/"
+      }
+    },
+    { "src": "/jobs/(?<id>[^/]+)$", "dest": "/jobs?id=$id" },
+    { "src": "/user/(?<id>[^/]+)$", "dest": "/user?id=$id" },
+    { "src": "/company/(?<id>[^/]+)$", "dest": "/company?id=$id" }
+  ],
+  "builds": [
+    { "src": "next.config.js", "use": "@now/next" }
+  ],
+  "build": {
+    "env": {
+      "SESSION_SECRET": "@session_secret",
+      "API_URL": "@api_url",
+      "API_USERNAME": "@api_username",
+      "API_PASSWORD": "@api_password",
+      "CAPTCHA_KEY": "@captcha_key",
+      "HOSTNAME": "@hostname"
+    }
+  }
+}
