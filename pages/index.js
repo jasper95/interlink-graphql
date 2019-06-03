@@ -2,7 +2,7 @@ import React from 'react'
 import Head from 'next/head'
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-import withAuth from 'lib/hocs/auth'
+import withAuth from 'lib/hocs/apolloAuth'
 import Page from 'components/Layout/Page'
 import JobPosts from 'components/JobPosts'
 import { createSelector } from 'reselect'
@@ -23,23 +23,23 @@ function Index(props) {
   )
 }
 
-Index.getInitialProps = async(ctx) => {
-  // let url = '/job/search'
-  // const { store } = ctx
-  // const { user } = store.getState().auth
-  // if (user && user.role === 'ADMIN') {
-  //   url = '/user/applicant/suggestion'
-  // }
-  // const posts = await api({ url }, ctx)
-  // store.dispatch(GetJobData({
-  //   data: posts,
-  //   request: false,
-  //   key: 'list'
-  // }))
-  return { }
-}
+// Index.getInitialProps = async(ctx) => {
+//   // let url = '/job/search'
+//   // const { store } = ctx
+//   // const { user } = store.getState().auth
+//   // if (user && user.role === 'ADMIN') {
+//   //   url = '/user/applicant/suggestion'
+//   // }
+//   // const posts = await api({ url }, ctx)
+//   // store.dispatch(GetJobData({
+//   //   data: posts,
+//   //   request: false,
+//   //   key: 'list'
+//   // }))
+//   return { }
+// }
 
-export default Index
+export default withAuth()(Index)
 
 // export default compose(
 //   // withAuth('optional'),

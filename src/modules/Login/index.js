@@ -9,9 +9,7 @@ import gql from 'graphql-tag'
 import Page from 'components/Layout/Page'
 import Router from 'next/router'
 import joi from 'joi'
-import SubmitButton from 'components/SubmitButton'
 import 'sass/pages/login.scss'
-
 
 const initialFields = {
   password: '',
@@ -20,7 +18,7 @@ const initialFields = {
 }
 
 function LoginPage(props){
-  const { dispatch, verified, onLogin, loginResponse } = props
+  const { verified, onLogin } = props
   const [formState, formHandlers] = useForm({ initialFields, validator, onValid })
   const {
     onElementChange,
@@ -171,7 +169,3 @@ export default function LoginGraphql() {
     </Mutation>
   )
 }
-// export default compose(
-//   // withAuth(false),
-//   connect()
-// )(LoginPage)
