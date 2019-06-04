@@ -2,7 +2,7 @@ import React from 'react';
 import App, { Container } from 'next/app'
 import Head from 'next/head'
 import withApollo from 'lib/apollo/withApollo'
-import { ApolloProvider } from 'react-apollo'
+import { ApolloProvider } from 'react-apollo-hooks'
 import Router from 'next/router'
 import NProgress from 'nprogress'
 import { compose } from 'redux'

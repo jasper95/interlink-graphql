@@ -47,7 +47,7 @@ function create(initialState, { getToken, fetchOptions }) {
     customFetch: fetch
   })
   const httpLink = new HttpLink({
-    uri: 'http://jobhunt-graphql.herokuapp.com/v1/graphql',
+    uri: 'http://localhost:8080/v1/graphql',
     credentials: 'same-origin',
     fetchOptions
   })
@@ -60,7 +60,18 @@ function create(initialState, { getToken, fetchOptions }) {
       authLink,
       restLink,
       httpLink
-    ])
+    ]),
+    resolvers: {
+      Mutation: {
+        setNotification(notification, args, { cache }) {
+          cache.writeData({
+            data: {
+              notification
+            }
+          })
+        }
+      }
+    },
   })
 }
 

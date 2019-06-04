@@ -2,7 +2,7 @@ import React from 'react';
 import Grid from 'react-md/lib/Grids/Grid'
 import Cell from 'react-md/lib/Grids/Cell'
 import gql from 'graphql-tag'
-import { Query } from 'react-apollo'
+import { useQuery } from 'react-apollo-hooks'
 import Post from './Post'
 import ProfilePost from './ProfilePost'
 import Search from '../Search'
@@ -56,41 +56,23 @@ export default JobPosts
 
 function Posts(props) {
   const { postRenderer: PostComponent, posts } = props
-  // if (!posts) {
-  //   return (
-  //     <h1 className='jobSearch_jobs_msg'>
-  //       Server Error
-  //     </h1>
-  //   )
-  // } else if (posts.length < 1 ) {
-  //   return (
-  //     <h1 className='jobSearch_jobs_msg'>
-  //       No results found
-  //     </h1>
-  //   )
-  // }
+  const { data, error, loading } = useQuery(GET_DOGS);
+  if (loading) {
+    console.log('loading: ', loading);
+    return 'Loading'
+  }
+  if (error) {
+    console.log('error: ', error);
+    return 'Error'
+  }
+  console.log('data', data)
   return (
-    <Query query={GET_DOGS}>
-      {({ loading, error, data }) => {
-        if (loading) {
-          console.log('loading: ', loading);
-          return 'Loading'
-        }
-        if (error) {
-          console.log('error: ', error);
-          return 'Error'
-        }
-        console.log('data', data)
-        return (
-          <>
-           {data.job.map(post => (
-              <PostComponent key={post.id} post={post}/>
-            ))}
-          </>
-        )
-      }}
-    </Query>
-  ) 
+    <>
+     {data.job.map(post => (
+        <PostComponent key={post.id} post={post}/>
+      ))}
+    </>
+  )
 }
 
 Post.defaulProps = {

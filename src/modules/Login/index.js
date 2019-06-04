@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react'
 import Button from 'react-md/lib/Buttons/Button'
+import cn from 'classnames'
 import TextField from 'react-md/lib/TextFields/TextField'
-import { Mutation } from 'react-apollo'
+import { useMutation } from 'react-apollo-hooks'
 import Link from 'next/link';
 import useForm from 'lib/hooks/useForm'
 import { getValidationResult } from 'lib/tools'
@@ -11,14 +12,28 @@ import Router from 'next/router'
 import joi from 'joi'
 import 'sass/pages/login.scss'
 
+import { CREATE_NODE } from 'base/resolvers'
+
 const initialFields = {
   password: '',
   email: '',
   isShowPassword: false
 }
 
-function LoginPage(props){
-  const { verified, onLogin } = props
+// const SIGN_IN = gql`
+//   mutation Signin(
+//     $input: any!,
+//   ) {
+//     signinUser(input: $input)
+//       @rest(type: "User", path: "/login", method: "POST") {
+//         token
+//       }
+//   }
+// `
+
+export default function LoginPage(props){
+  const [onLogin, loginState] = useMutation(CREATE_NODE)
+  const { verified } = props
   const [formState, formHandlers] = useForm({ initialFields, validator, onValid })
   const {
     onElementChange,
@@ -97,7 +112,7 @@ function LoginPage(props){
             />
             <div className='authContainer_form_action'>
               <Button
-                className='iBttn iBttn-primary'
+                className={cn('iBttn iBttn-primary', { processing: loginState.loading })}
                 onClick={onValidate}
                 children='Login'
                 flat
@@ -127,7 +142,8 @@ function LoginPage(props){
   function onValid(data) {
     onLogin({
       variables: {
-        input: data
+        node: 'user',
+        input: data,
       }
     })
   }
@@ -138,34 +154,4 @@ function validator(data) {
     password: joi.string().required().error(() => 'Password is required')
   })
   return getValidationResult(data, schema)
-}
-
-const SIGN_IN = gql`
-  mutation Signin(
-    $input: any!,
-  ) {
-    signinUser(input: $input)
-      @rest(type: "User", path: "/login", method: "POST") {
-        token
-      }
-  }
-`
-export default function LoginGraphql() {
-  return (
-    <Mutation
-      mutation={SIGN_IN}
-      update={(cache, err) => {
-        console.log('cache: ', cache);
-        console.log('err: ', err);
-      }}
-      onError={err => {
-        console.log('err: ', err);
-
-      }}
-    >
-      {(onLogin, loginResponse) => (
-        <LoginPage onLogin={onLogin} loginResponse={loginResponse} />
-      )}
-    </Mutation>
-  )
 }

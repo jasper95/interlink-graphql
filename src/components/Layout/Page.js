@@ -2,10 +2,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import React from 'react'
 import Head from 'next/head'
 import { withRouter } from 'next/router'
+import gql from 'graphql-tag'
 import Header from './Header'
 import Footer from './Footer'
-import { createSelector } from 'reselect'
-import { connect } from 'react-redux'
+// import { createSelector } from 'reselect'
+// import { connect } from 'react-redux'
 import { compose } from 'redux'
 import Dialogs from 'components/Dialogs'
 import Snackbar from 'components/Snackbar'
@@ -15,6 +16,13 @@ import {
 
 
 import 'sass/common.scss'
+import { useQuery } from "react-apollo-hooks";
+
+const GET_NOTIFICATION = gql`
+  {
+    getNotification @client
+  }
+`
 
 function Page(props) {
   const {
@@ -23,6 +31,8 @@ function Page(props) {
     hasNavigation, hasFooter,
     pageId, className, pageDescription, router
   } = props
+  const result = useQuery(GET_NOTIFICATION)
+  console.log('result: ', result);
   let { pageTitle } = props
   if (pageTitle) {
     pageTitle = `InternLink - ${pageTitle}`
@@ -70,14 +80,14 @@ function Page(props) {
   )
 }
 
-const pageSelector = createSelector(
-  state => state.app.dialog,
-  state => state.app.notification,
-  (dialog, notification) => ({
-    dialog,
-    notification
-  })
-)
+// const pageSelector = createSelector(
+//   state => state.app.dialog,
+//   state => state.app.notification,
+//   (dialog, notification) => ({
+//     dialog,
+//     notification
+//   })
+// )
 
 // const EnhancedPage = compose(
 //   withRouter,

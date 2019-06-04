@@ -175,11 +175,3 @@ function Header(props) {
 }
 
 export default Header
-// export default connect(createSelector(
-//   authSelector,
-//   state => state.profile.notifications,
-//   (auth, notifications) => ({
-//     ...auth,
-//     notifications
-//   })
-// ))(Header)
