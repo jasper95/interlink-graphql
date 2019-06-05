@@ -6,7 +6,7 @@ const getSession = apolloClient =>
   apolloClient
     .query({
       query: gql`
-        query getUser {
+        query {
           session @rest(type: "Auth", path: "/session") {
             id,
             last_name,

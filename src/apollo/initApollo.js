@@ -6,6 +6,7 @@ import { setContext } from 'apollo-link-context'
 import ApolloClient from 'apollo-client'
 import { onError } from 'apollo-link-error'
 import fetch from 'node-fetch'
+import jwt from 'jsonwebtoken'
 import QUERY from 'apollo/query'
 
 let apolloClient = null
@@ -45,13 +46,28 @@ function create(initialState, { getToken, fetchOptions }) {
       })
     }
   })
-  const authLink = setContext((_, { headers }) => {
+  const restAuthLink = setContext((_, { headers }) => {
     const token = getToken()
     const basicAuth = Buffer.from(process.env.API_USERNAME + ':' + process.env.API_PASSWORD).toString('base64')
     return {
       headers: {
         ...headers,
         Authorization: token ? `Bearer ${token}` : `Basic ${basicAuth}`
+      }
+    }
+  })
+  const httpAuthLink = setContext((_, { headers }) => {
+    const token = getToken() || jwt.sign({
+      hasura_claims: {
+        'x-hasura-default-role': 'anonymous',
+        'x-hasura-allowed-roles': ['anonymous']
+      }},
+      process.env.AUTH_SECRET
+    )
+    return {
+      headers: {
+        ...headers,
+        Authorization: `Bearer ${token}`
       }
     }
   })
@@ -71,8 +87,9 @@ function create(initialState, { getToken, fetchOptions }) {
     cache: new InMemoryCache().restore(initialState || {}),
     link: ApolloLink.from([
       errorLink,
-      authLink,
+      restAuthLink,
       restLink,
+      httpAuthLink,
       httpLink
     ]),
     resolvers: {
