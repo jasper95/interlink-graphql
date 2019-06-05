@@ -2,17 +2,18 @@ import React, { useEffect } from 'react'
 import Button from 'react-md/lib/Buttons/Button'
 import cn from 'classnames'
 import TextField from 'react-md/lib/TextFields/TextField'
-import { useMutation } from 'react-apollo-hooks'
+import useMutation from 'lib/hooks/useMutation'
 import Link from 'next/link';
 import useForm from 'lib/hooks/useForm'
 import { getValidationResult } from 'lib/tools'
-import gql from 'graphql-tag'
 import Page from 'components/Layout/Page'
 import Router from 'next/router'
+import cookie from 'js-cookie'
 import joi from 'joi'
+import { generateMutation } from 'apollo/mutation'
+
 import 'sass/pages/login.scss'
 
-import { CREATE_NODE } from 'base/resolvers'
 
 const initialFields = {
   password: '',
@@ -20,21 +21,10 @@ const initialFields = {
   isShowPassword: false
 }
 
-// const SIGN_IN = gql`
-//   mutation Signin(
-//     $input: any!,
-//   ) {
-//     signinUser(input: $input)
-//       @rest(type: "User", path: "/login", method: "POST") {
-//         token
-//       }
-//   }
-// `
-
 export default function LoginPage(props){
-  const [onLogin, loginState] = useMutation(CREATE_NODE)
-  const { verified } = props
   const [formState, formHandlers] = useForm({ initialFields, validator, onValid })
+  const [onLogin, loginState] = useMutation(generateMutation(['id', 'token']))
+  const { verified } = props
   const {
     onElementChange,
     onValidate
@@ -142,8 +132,16 @@ export default function LoginPage(props){
   function onValid(data) {
     onLogin({
       variables: {
-        node: 'user',
-        input: data,
+        url: '/login',
+        input: data
+      },
+      onCompleted: (data) => {
+        console.log('completed data: ', data);
+
+      },
+      update: (_, { data: { nodeMutation } }) => {
+        cookie.set('token', nodeMutation.token, { expires: 360000 })
+        Router.push('/')
       }
     })
   }

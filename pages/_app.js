@@ -1,10 +1,12 @@
 import React from 'react';
 import App, { Container } from 'next/app'
 import Head from 'next/head'
-import withApollo from 'lib/apollo/withApollo'
+import withApollo from 'lib/hocs/withApollo'
 import { ApolloProvider } from 'react-apollo-hooks'
 import Router from 'next/router'
 import NProgress from 'nprogress'
+import initApollo from 'apollo/initApollo'
+import initialState from 'apollo/initialState'
 import { compose } from 'redux'
 
 Router.onRouteChangeStart = () => NProgress.start();
@@ -28,5 +30,5 @@ class MyApp extends App {
 }
 
 export default compose(
-  withApollo
+  withApollo(initApollo, initialState)
 )(MyApp)

@@ -6,10 +6,11 @@ import { setContext } from 'apollo-link-context'
 import ApolloClient from 'apollo-client'
 import { onError } from 'apollo-link-error'
 import fetch from 'node-fetch'
+import QUERY from 'apollo/query'
 
 let apolloClient = null
+const { GET_NOTIFICATION } = QUERY
 
-// Polyfill fetch() on the server (used by apollo-client)
 if (!process.browser) {
   global.fetch = fetch
   global.Headers = fetch.Headers;
@@ -24,11 +25,24 @@ function create(initialState, { getToken, fetchOptions }) {
         console.log(`[GraphQL error]: Message: ${message}, Path: ${path}`)
       );
     }
-  
+
     if (networkError) {
       console.log(
         `[Network error ${operation.operationName}]: ${networkError.message}`
       );
+    }
+
+    if (networkError.statusCode === 400) {
+      const { message } = networkError.result
+      cache.writeQuery({
+        query: GET_NOTIFICATION,
+        data: {
+          notification: {
+            message,
+            type: 'error'
+          }
+        }
+      })
     }
   })
   const authLink = setContext((_, { headers }) => {
@@ -47,7 +61,7 @@ function create(initialState, { getToken, fetchOptions }) {
     customFetch: fetch
   })
   const httpLink = new HttpLink({
-    uri: 'http://localhost:8080/v1/graphql',
+    uri: 'http://jobhunt-graphql.herokuapp.com/v1/graphql',
     credentials: 'same-origin',
     fetchOptions
   })
@@ -63,10 +77,12 @@ function create(initialState, { getToken, fetchOptions }) {
     ]),
     resolvers: {
       Mutation: {
-        setNotification(notification, args, { cache }) {
-          cache.writeData({
+        resetKey(param, variables, { cache }) {
+          const { query, key } = variables
+          cache.writeQuery({
+            query,
             data: {
-              notification
+              [key]: null,
             }
           })
         }
@@ -76,13 +92,10 @@ function create(initialState, { getToken, fetchOptions }) {
 }
 
 export default function initApollo (initialState, options) {
-  // Make sure to create a new client for every server-side request so that data
-  // isn't shared between connections (which would be bad)
   if (!process.browser) {
     return create(initialState, options)
   }
 
-  // Reuse client on the client-side
   if (!apolloClient) {
     apolloClient = create(initialState, options)
   }

@@ -1,38 +1,36 @@
-import "react-datepicker/dist/react-datepicker.css";
+import 'react-datepicker/dist/react-datepicker.css';
 import React from 'react'
 import Head from 'next/head'
 import { withRouter } from 'next/router'
 import gql from 'graphql-tag'
 import Header from './Header'
 import Footer from './Footer'
-// import { createSelector } from 'reselect'
-// import { connect } from 'react-redux'
-import { compose } from 'redux'
+import flow from 'lodash/flow'
 import Dialogs from 'components/Dialogs'
 import Snackbar from 'components/Snackbar'
-import {
-  HideNotification
-} from 'redux/app/actions'
-
-
+import { useQuery, useMutation } from 'react-apollo-hooks'
+import QUERY from 'apollo/query'
 import 'sass/common.scss'
-import { useQuery } from "react-apollo-hooks";
 
-const GET_NOTIFICATION = gql`
-  {
-    getNotification @client
+const { GET_NOTIFICATION } = QUERY
+
+export const RESET_KEY = gql`
+  mutation ResetKey($key: any, $query: any) {
+    resetKey(key: $key, query: $query) @client 
   }
 `
 
 function Page(props) {
   const {
     children, dialog,
-    notification, dispatch,
     hasNavigation, hasFooter,
     pageId, className, pageDescription, router
   } = props
-  const result = useQuery(GET_NOTIFICATION)
-  console.log('result: ', result);
+  const { data = {} } = useQuery(GET_NOTIFICATION, { ssr: false })
+  const [onHideNotification] = useMutation(RESET_KEY,
+    { variables: { key: 'notification', query: GET_NOTIFICATION } }
+  )
+  const { notification } = data
   let { pageTitle } = props
   if (pageTitle) {
     pageTitle = `InternLink - ${pageTitle}`
@@ -59,7 +57,7 @@ function Page(props) {
       )}
       {notification && (
         <Snackbar
-          onClose={() => dispatch(HideNotification())}
+          onClose={onHideNotification}
           open={!!notification}
           {...notification}
         />
@@ -80,21 +78,7 @@ function Page(props) {
   )
 }
 
-// const pageSelector = createSelector(
-//   state => state.app.dialog,
-//   state => state.app.notification,
-//   (dialog, notification) => ({
-//     dialog,
-//     notification
-//   })
-// )
-
-// const EnhancedPage = compose(
-//   withRouter,
-//   connect(pageSelector)
-// )(Page)
-
-const EnhancedPage = compose(withRouter)(Page)
+const EnhancedPage = flow(withRouter)(Page)
 
 EnhancedPage.defaultProps = {
   hasNavigation: true,

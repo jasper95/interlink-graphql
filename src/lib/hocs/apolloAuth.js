@@ -1,27 +1,28 @@
 import React from 'react'
 import gql from 'graphql-tag'
+import QUERY from 'apollo/query'
 
 const getSession = apolloClient =>
   apolloClient
     .query({
       query: gql`
         query getUser {
-          session @rest(type: "user", path: "/session") {
-            token,
-            company_id,
-            first_name
+          session @rest(type: "Auth", path: "/session") {
+            id,
+            last_name,
+            first_name,
+            avatar,
+            role,
+            company {
+              id,
+              name
+            }
           }
         }
       `
     })
-    .then(({ data }) => {
-      console.log('zzzz: ', data);
-      return { loggedInUser: data }
-    })
-    .catch(() => {
-      // Fail gracefully
-      return { loggedInUser: null }
-    })
+    .then(({ data }) => ({ data }))
+    .catch(() => null)
 
 
 export default (requireAuth = true) => WrappedComponent => {
@@ -34,8 +35,17 @@ export default (requireAuth = true) => WrappedComponent => {
     WrappedComponent.name ||
     'Component'})`
   Authentication.getInitialProps = async(ctx) => {
-    const { loggedInUser } = await getSession(ctx.apolloClient)
-    return { loggedInUser }
+    const { apolloClient } = ctx
+    const auth = await getSession(apolloClient)
+    if (auth) {
+      apolloClient.writeQuery({
+        query: QUERY.GET_AUTH,
+        data: {
+          auth: auth.data.session
+        }
+      })
+    }
+    return { }
   }
   return Authentication
 }

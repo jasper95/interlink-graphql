@@ -3,11 +3,9 @@ import Link from 'next/link';
 import Button from 'react-md/lib/Buttons/Button'
 import ImageLoader from 'react-image'
 import { Logout } from 'redux/auth/actions'
-import { connect } from 'react-redux'
 import { ShowDialog } from 'redux/app/actions'
 import { GetProfileData } from 'redux/profile/actions'
 import { SetUserAuth } from 'redux/auth/actions'
-import authSelector from 'redux/auth/selector'
 import DropdownMenu from 'react-md/lib/Menus/DropdownMenu'
 import FontIcon from 'react-md/lib/FontIcons/FontIcon'
 import Avatar from 'react-md/lib/Avatars/Avatar'
@@ -16,14 +14,19 @@ import Subheader from 'react-md/lib/Subheaders/Subheader'
 import Divider from 'react-md/lib/Dividers/Divider'
 import Badge from 'react-md/lib/Badges/Badge'
 import { format as formatTime } from 'timeago.js'
-import { createSelector } from 'reselect'
+import QUERY from 'apollo/query'
+import { useQuery } from 'react-apollo-hooks'
 
 import 'sass/components/nav/index.scss'
 
 function Header(props) {
   const {
-    isAuthenticated, dispatch, user, avatarLink, profileLink
+    avatarLink = '', profileLink = ''
   } = props
+
+  const { data = {}} = useQuery(QUERY.GET_AUTH)
+  const { auth: user } = data
+  const isAuthenticated = Boolean(user)
 
   return (
     <nav className='nav'>

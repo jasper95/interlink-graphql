@@ -5,17 +5,11 @@ import { renderToString } from 'react-dom/server'
 import { getMarkupFromTree } from 'react-apollo-hooks'
 import Head from 'next/head'
 
-import initApollo from './initApollo'
-
-const initialState = {
-  notifications: null
-}
-
 function parseCookies (req, options = {}) {
   return cookie.parse(req ? req.headers.cookie || '' : document.cookie, options)
 }
 
-export default App => {
+export default (initApollo, initialState) => App => {
   return class WithApollo extends React.Component {
     static displayName = `WithApollo(${App.displayName})`
     static propTypes = {
