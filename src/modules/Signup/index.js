@@ -3,12 +3,12 @@ import Page from 'components/Layout/Page'
 import Button from 'react-md/lib/Buttons/Button'
 import TextField from 'react-md/lib/TextFields/TextField'
 import Link from 'next/link';
-import { NODE_MUTATION } from 'apollo/mutation'
+import { generateMutation, setNotification, applyUpdates } from 'apollo/mutation'
 import { useMutation } from 'react-apollo-hooks'
 import useForm from 'lib/hooks/useForm'
-import { getValidationResult } from 'lib/tools'
+import { getValidationResult, delay } from 'lib/tools'
 import joi from 'joi'
-
+import Router from 'next/router'
 import cn from 'classnames'
 import 'sass/pages/signup.scss'
 
@@ -23,7 +23,7 @@ const initialFields = {
 }
 
 export default function SignupPage(){
-  const [onSignup, signupState] = useMutation(NODE_MUTATION)
+  const [onSignup, signupState] = useMutation(generateMutation({ url: '/signup', keys: ['id'] }))
   const [formState, formHandlers] = useForm({ initialFields, validator, onValid })
   const {
     onElementChange,
@@ -175,20 +175,13 @@ export default function SignupPage(){
     onSignup({
       variables: {
         input: data,
-        method: 'POST',
-        node: '/signup'
       },
-      update: (cache) => {
-        cache.writeData({
-          data: {
-            notification: {
-              message: 'Account successfully registered. Please verify your email to login',
-              type: 'success',
-              __typename: 'Notification'
-            }
-          }
-        })
-      }
+      update: applyUpdates(
+        setNotification('Account successfully registered. Please verify your email to login'),
+        () => delay(3000),
+        setNotification(null),
+        () => Router.push('/login')
+      )
     })
   }
 }

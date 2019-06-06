@@ -7,10 +7,9 @@ import ApolloClient from 'apollo-client'
 import { onError } from 'apollo-link-error'
 import fetch from 'node-fetch'
 import jwt from 'jsonwebtoken'
-import QUERY from 'apollo/query'
+import { setNotification } from 'apollo/mutation'
 
 let apolloClient = null
-const { GET_NOTIFICATION } = QUERY
 
 if (!process.browser) {
   global.fetch = fetch
@@ -35,15 +34,7 @@ function create(initialState, { getToken, fetchOptions }) {
 
     if (networkError.statusCode === 400) {
       const { message } = networkError.result
-      cache.writeQuery({
-        query: GET_NOTIFICATION,
-        data: {
-          notification: {
-            message,
-            type: 'error'
-          }
-        }
-      })
+      setNotification(message, 'error')(cache)
     }
   })
   const restAuthLink = setContext((_, { headers }) => {

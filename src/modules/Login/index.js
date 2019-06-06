@@ -23,7 +23,7 @@ const initialFields = {
 
 export default function LoginPage(props){
   const [formState, formHandlers] = useForm({ initialFields, validator, onValid })
-  const [onLogin, loginState] = useMutation(generateMutation(['id', 'token']))
+  const [onLogin, loginState] = useMutation(generateMutation({ keys: ['id', 'token'], url: '/login' }))
   const { verified } = props
   const {
     onElementChange,
@@ -132,18 +132,15 @@ export default function LoginPage(props){
   function onValid(data) {
     onLogin({
       variables: {
-        url: '/login',
         input: data
       },
-      onCompleted: (data) => {
-        console.log('completed data: ', data);
-
-      },
-      update: (_, { data: { nodeMutation } }) => {
-        cookie.set('token', nodeMutation.token, { expires: 360000 })
-        Router.push('/')
-      }
+      update: setToken
     })
+  }
+
+  function setToken(_, { data: { nodeMutation } }) {
+    cookie.set('token', nodeMutation.token, { expires: 360000 })
+    Router.push('/')
   }
 }
 function validator(data) {

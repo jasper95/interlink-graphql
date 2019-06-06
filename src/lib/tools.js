@@ -111,3 +111,7 @@ export function getDownloadFilename(headers = {}) {
   const [,filename] = keyValue.split('=')
   return filename
 }
+
+export async function delay(ms = 1000) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}

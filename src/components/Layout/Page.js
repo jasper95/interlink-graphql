@@ -8,8 +8,9 @@ import Footer from './Footer'
 import flow from 'lodash/flow'
 import Dialogs from 'components/Dialogs'
 import Snackbar from 'components/Snackbar'
-import { useQuery, useMutation } from 'react-apollo-hooks'
+import { useQuery, useApolloClient } from 'react-apollo-hooks'
 import QUERY from 'apollo/query'
+import { setNotification } from 'apollo/mutation'
 import 'sass/common.scss'
 
 const { GET_NOTIFICATION } = QUERY
@@ -27,9 +28,10 @@ function Page(props) {
     pageId, className, pageDescription, router
   } = props
   const { data = {} } = useQuery(GET_NOTIFICATION, { ssr: false })
-  const [onHideNotification] = useMutation(RESET_KEY,
-    { variables: { key: 'notification', query: GET_NOTIFICATION } }
-  )
+  const client = useApolloClient()
+  // const [onHideNotification] = useMutation(RESET_KEY,
+  //   { variables: { key: 'notification', query: GET_NOTIFICATION } }
+  // )
   const { notification } = data
   let { pageTitle } = props
   if (pageTitle) {
@@ -57,7 +59,9 @@ function Page(props) {
       )}
       {notification && (
         <Snackbar
-          onClose={onHideNotification}
+          onClose={() => {
+            setNotification(null)(client)
+          }}
           open={!!notification}
           {...notification}
         />
