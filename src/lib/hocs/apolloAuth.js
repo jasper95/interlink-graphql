@@ -1,6 +1,6 @@
 import React from 'react'
 import gql from 'graphql-tag'
-import QUERY from 'apollo/query'
+import { setData } from 'apollo/mutation'
 
 const getSession = apolloClient =>
   apolloClient
@@ -38,12 +38,7 @@ export default (requireAuth = true) => WrappedComponent => {
     const { apolloClient } = ctx
     const auth = await getSession(apolloClient)
     if (auth) {
-      apolloClient.writeQuery({
-        query: QUERY.GET_AUTH,
-        data: {
-          auth: auth.data.session
-        }
-      })
+      setData('auth', auth.data.session)
     }
     return { }
   }

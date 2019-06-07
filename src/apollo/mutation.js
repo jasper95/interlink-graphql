@@ -20,14 +20,22 @@ export const applyUpdates = (...fns) =>
 
 export const setNotification = (message, type = 'success') => {
   return (cache) => {
-    cache.writeQuery({
+    return setData('notification', {
+      notification: message ? {
+        message,
+        type,
+      } : null
+    })(cache)
+  }
+}
+
+export const setData = (key, value) => {
+  return (cache) => {
+    return cache.writeQuery({
       data: {
-        notification: message ? {
-          message,
-          type,
-        } : null
+        [key]: value
       },
-      query: QUERY.GET_NOTIFICATION
+      query: QUERY[`GET_${key.toUpperCase()}`]
     })
   }
 }
