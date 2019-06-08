@@ -13,9 +13,8 @@ import {
 import {
   SetUserAuth
 } from 'redux/auth/actions'
-import authSelector from 'redux/auth/selector'
+import { useAppData } from 'apollo/query'
 import { compose } from 'redux'
-import { connect } from 'react-redux'
 
 function MenuItem(props) {
   const { icon, label, link, active } = props
@@ -75,7 +74,9 @@ const ROLE_NAV = {
 }
 
 function ProfileNavigation(props) {
-  const { user, router, avatarLink, profileLink } = props;
+  const { router, avatarLink, profileLink } = props
+  const [appData] = useAppData()
+  const { auth: user } = appData
   if (!user) {
     return null
   }
@@ -173,5 +174,4 @@ function ProfileNavigation(props) {
 
 export default compose(
   withRouter,
-  connect(authSelector)
 )(ProfileNavigation)

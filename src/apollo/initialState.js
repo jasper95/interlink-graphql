@@ -1,5 +1,5 @@
 export default {
-  notification: null,
+  toast: null,
   auth: null,
   dialog: null
 }

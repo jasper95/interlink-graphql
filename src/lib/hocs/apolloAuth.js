@@ -1,21 +1,32 @@
-import React from 'react'
+import React, { createContext } from 'react'
 import gql from 'graphql-tag'
 import { setData } from 'apollo/mutation'
 
+export const AuthContext = createContext(null)
 const getSession = apolloClient =>
   apolloClient
     .query({
       query: gql`
         query {
           session @rest(type: "Auth", path: "/session") {
-            id,
-            last_name,
-            first_name,
-            avatar,
-            role,
+            id
+            last_name
+            first_name
+            avatar
+            role
+            slug
+            unread_notifications
+            address_description
+            address
+            contact_number
+            email
+            resume
+            nationality
+            birth_date
             company {
-              id,
+              id
               name
+              slug
             }
           }
         }
@@ -38,7 +49,7 @@ export default (requireAuth = true) => WrappedComponent => {
     const { apolloClient } = ctx
     const auth = await getSession(apolloClient)
     if (auth) {
-      setData('auth', auth.data.session)
+      setData('auth', auth.data.session)(apolloClient)
     }
     return { }
   }

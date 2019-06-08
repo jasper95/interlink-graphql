@@ -2,37 +2,22 @@ import 'react-datepicker/dist/react-datepicker.css';
 import React from 'react'
 import Head from 'next/head'
 import { withRouter } from 'next/router'
-import gql from 'graphql-tag'
 import Header from './Header'
 import Footer from './Footer'
 import flow from 'lodash/flow'
 import Dialogs from 'components/Dialogs'
 import Snackbar from 'components/Snackbar'
-import { useQuery, useApolloClient } from 'react-apollo-hooks'
-import QUERY from 'apollo/query'
-import { setNotification } from 'apollo/mutation'
+import { useAppData } from 'apollo/query'
 import 'sass/common.scss'
-
-const { GET_NOTIFICATION } = QUERY
-
-export const RESET_KEY = gql`
-  mutation ResetKey($key: any, $query: any) {
-    resetKey(key: $key, query: $query) @client 
-  }
-`
 
 function Page(props) {
   const {
-    children, dialog,
+    children,
     hasNavigation, hasFooter,
     pageId, className, pageDescription, router
   } = props
-  const { data = {} } = useQuery(GET_NOTIFICATION, { ssr: false })
-  const client = useApolloClient()
-  // const [onHideNotification] = useMutation(RESET_KEY,
-  //   { variables: { key: 'notification', query: GET_NOTIFICATION } }
-  // )
-  const { notification } = data
+  const [appData, setAppData] = useAppData()
+  const { toast, dialog } = appData
   let { pageTitle } = props
   if (pageTitle) {
     pageTitle = `InternLink - ${pageTitle}`
@@ -57,13 +42,11 @@ function Page(props) {
       {hasNavigation && (
         <Header />
       )}
-      {notification && (
+      {toast && (
         <Snackbar
-          onClose={() => {
-            setNotification(null)(client)
-          }}
-          open={!!notification}
-          {...notification}
+          onClose={() => setAppData('toast', null)}
+          open={!!toast}
+          {...toast}
         />
       )}
       {Dialog && (

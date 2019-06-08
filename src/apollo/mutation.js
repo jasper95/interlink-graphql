@@ -2,7 +2,7 @@ import gql from 'graphql-tag'
 import bluebird from 'bluebird'
 import QUERY from './query'
 
-export const generateMutation = ({ keys = ['id'], method = 'POST', url }) => {
+export function generateMutation({ keys = ['id'], method = 'POST', url }) {
   return gql`
     mutation NodeMutation(
       $input: any!,
@@ -15,21 +15,11 @@ export const generateMutation = ({ keys = ['id'], method = 'POST', url }) => {
   `
 }
 
-export const applyUpdates = (...fns) => 
-  (cache, result) => bluebird.mapSeries(fns, fn => fn(cache, result))
-
-export const setNotification = (message, type = 'success') => {
-  return (cache) => {
-    return setData('notification', {
-      notification: message ? {
-        message,
-        type,
-      } : null
-    })(cache)
-  }
+export function applyUpdates (...fns) {
+  return (cache, result) => bluebird.mapSeries(fns, fn => fn(cache, result))
 }
 
-export const setData = (key, value) => {
+export function setData(key, value) {
   return (cache) => {
     return cache.writeQuery({
       data: {
@@ -37,5 +27,14 @@ export const setData = (key, value) => {
       },
       query: QUERY[`GET_${key.toUpperCase()}`]
     })
+  }
+}
+
+export function setToast(message, type = 'success') {
+  return (cache) => {
+    return setData('toast', message ? {
+      message,
+      type,
+    } : null)(cache)
   }
 }

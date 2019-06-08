@@ -58,14 +58,11 @@ function Posts(props) {
   const { postRenderer: PostComponent, posts } = props
   const { data, error, loading } = useQuery(GET_DOGS);
   if (loading) {
-    console.log('loading: ', loading);
     return 'Loading'
   }
   if (error) {
-    console.log('error: ', error);
     return 'Error'
   }
-  console.log('data', data)
   return (
     <>
      {data.job.map(post => (

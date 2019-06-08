@@ -1,11 +1,9 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Link from 'next/link';
 import Button from 'react-md/lib/Buttons/Button'
 import ImageLoader from 'react-image'
 import { Logout } from 'redux/auth/actions'
 import { ShowDialog } from 'redux/app/actions'
-import { GetProfileData } from 'redux/profile/actions'
-import { SetUserAuth } from 'redux/auth/actions'
 import DropdownMenu from 'react-md/lib/Menus/DropdownMenu'
 import FontIcon from 'react-md/lib/FontIcons/FontIcon'
 import Avatar from 'react-md/lib/Avatars/Avatar'
@@ -14,20 +12,38 @@ import Subheader from 'react-md/lib/Subheaders/Subheader'
 import Divider from 'react-md/lib/Dividers/Divider'
 import Badge from 'react-md/lib/Badges/Badge'
 import { format as formatTime } from 'timeago.js'
-import QUERY from 'apollo/query'
-import { useQuery } from 'react-apollo-hooks'
+import gql from 'graphql-tag'
+import { useManualQuery, useAppData } from 'apollo/query'
 
 import 'sass/components/nav/index.scss'
 
+const NOTIFICATION_QUERY = gql`
+  query userNotification($user_id: uuid){
+    notification(where: {user_id: {_eq: $user_id }}) {
+      body
+      created_date
+      id
+      status
+    }
+  }
+`
+
 function Header(props) {
   const {
-    avatarLink = '', profileLink = ''
+    avatarLink = ''
   } = props
-
-  const { data = {}} = useQuery(QUERY.GET_AUTH)
-  const { auth: user } = data
+  const [appData] = useAppData()
+  const { auth: user } = appData
+  const [notifStates, notifHandlers] = useManualQuery(
+    NOTIFICATION_QUERY,
+    {
+      variables: {
+        user_id: user && user.id
+      }
+    },
+    { notification: [] }
+  )
   const isAuthenticated = Boolean(user)
-
   return (
     <nav className='nav'>
       <div className='nav_container'>
@@ -66,6 +82,7 @@ function Header(props) {
       </Link>
     )
     if (isAuthenticated) {
+      const profileLink = user.company ? `/company/${user.company.slug}` : `/user/${user.slug}`
       const displayName = [
         user.first_name,
         user.last_name,
@@ -97,6 +114,11 @@ function Header(props) {
           <DropdownMenu 
             id='notif'
             menuItems={renderNotifications()}
+            onVisibilityChange={(visible) => {
+              if (visible) {
+                notifHandlers.onQuery()
+              }
+            }}
             anchor={{
               x: DropdownMenu.HorizontalAnchors.INNER_LEFT,
               y: DropdownMenu.VerticalAnchors.BOTTOM,
@@ -111,7 +133,6 @@ function Header(props) {
               <Button
                 icon
                 children='notifications'
-                onClick={handleGetNotification}
                 className='nav_profile_notification'
               />
             </Badge>
@@ -136,7 +157,7 @@ function Header(props) {
   }
 
   function renderNotifications() {
-    const { notifications = [] } = props
+    const { notification: notifications = [] } = notifStates.data
     const unreadNotifications = notifications.filter(e => e.status === 'unread')
     const readNotifications = notifications.filter(e => e.status !== 'unread')
     return [
@@ -166,14 +187,15 @@ function Header(props) {
   }
 
   function handleGetNotification() {
-    dispatch(SetUserAuth({
-      ...user,
-      unread_notifications: 0
-    }))
-    dispatch(GetProfileData({
-      key: 'notifications',
-      url: '/user/notification'
-    }))
+    // notifHandlers.onQuery()
+    // dispatch(SetUserAuth({
+    //   ...user,
+    //   unread_notifications: 0
+    // }))
+    // dispatch(GetProfileData({
+    //   key: 'notifications',
+    //   url: '/user/notification'
+    // }))
   }
 }
 

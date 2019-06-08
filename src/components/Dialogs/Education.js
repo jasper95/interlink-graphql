@@ -6,16 +6,24 @@ import withDialog from 'lib/hocs/dialog'
 import { getValidationResult } from 'lib/tools'
 import joi from 'joi'
 import Select from 'react-select'
-import useFormOptions, { formOptionsSelector } from 'lib/hooks/useFormOptions'
-import { connect } from 'react-redux'
+import { useQuery } from 'react-apollo-hooks'
+import gql from 'graphql-tag'
 import DatePicker from 'react-datepicker'
 
+const JOB_CATEGORY_QUERY = gql`
+  query {
+    job_category {
+      id,
+      name
+    }
+  }
+`
 
 function EducationDialog(props) {
-  const { formState, formHandlers, options, dispatch } = props
+  const { formState, formHandlers } = props
   const { fields, errors } = formState
   const { onElementChange, onChange } =  formHandlers
-  useFormOptions({ dispatch, options, optionKeys: [{ key: 'jobCategories' }] })
+  const { data } = useQuery(JOB_CATEGORY_QUERY)
   return (
     <>
       <div className='iField'>
@@ -25,7 +33,7 @@ function EducationDialog(props) {
           getOptionLabel={(e) => e.name}
           getOptionValue={(e) => e.id}
           onChange={value => onChange('job_category_id', value.id)}
-          options={options.jobCategories || []}
+          options={data.job_category || []}
         />
         <TextFieldMessage
           errorText={errors.job_category_id}
@@ -99,7 +107,7 @@ function validator(data) {
 
 const Dialog = compose(
   withDialog(),
-  connect(formOptionsSelector)
+  // connect(formOptionsSelector)
 )(EducationDialog)
 
 Dialog.defaultProps = {

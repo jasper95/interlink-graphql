@@ -1,7 +1,4 @@
 import React from 'react'
-import api from 'lib/api'
-import queryString from 'query-string'
-import { connect } from 'react-redux'
 import {
   ShowDialog,
   Create,
@@ -9,23 +6,20 @@ import {
   Delete
 } from 'redux/app/actions'
 import pick from 'lodash/pick'
-import { createSelector } from 'reselect'
-// import authSelector from 'redux/auth/selector'
+import { useAppData } from 'apollo/query'
 
 const withBasePage = (params) => WrappedComponent => {
   const {
     node,
-    getListRequestData = () => ({}),
     dataFormatter = (e) => e,
     pageName,
     dialogPath,
-    getListRequestAction,
+    listQuery,
     dataPropKey,
-    reducer,
     dialogProps = {}
   } = params
   function BasePage(props) {
-    const { dispatch } = props
+    const [, setAppData] = useAppData()
     return (
       <WrappedComponent
         onDelete={handleDelete}
@@ -38,38 +32,49 @@ const withBasePage = (params) => WrappedComponent => {
     )
 
     function handleNew() {
-      dispatch(ShowDialog({
+      setAppData('dialog', {
         path: dialogPath,
         props: {
           ...dialogProps,
           dialogId: dialogPath,
           title: `New ${pageName}`,
-          onValid: (data) => dispatch(Create({
-            data: dataFormatter(data, 'SAVE_CREATE', props),
-            node,
-            callback: getList
-          }))
+          onValid: (data) => {
+
+          }
         }
-      }))
+      })
+      // dispatch(ShowDialog({
+      //   path: dialogPath,
+      //   props: {
+      //     ...dialogProps,
+      //     dialogId: dialogPath,
+      //     title: `New ${pageName}`,
+      //     onValid: (data) => dispatch(Create({
+      //       data: dataFormatter(data, 'SAVE_CREATE', props),
+      //       node,
+      //       callback: getList
+      //     }))
+      //   }
+      // }))
     }
 
     async function handleEdit(row) {
-      const data = await api({
-        url: `/${node}/${row.id}`
-      })
-      dispatch(ShowDialog({
-        path: dialogPath,
-        props: {
-          ...dialogProps,
-          title: `Edit ${pageName}`,
-          initialFields: dataFormatter(data, 'EDIT', props),
-          onValid: data => dispatch(Update({
-            data: dataFormatter(data, 'SAVE_EDIT', props),
-            node,
-            callback: getList
-          })),
-        }
-      }))
+      // const data = await api({
+      //   url: `/${node}/${row.id}`
+      // })
+      // dispatch(ShowDialog({
+      //   path: dialogPath,
+      //   props: {
+      //     ...dialogProps,
+      //     title: `Edit ${pageName}`,
+      //     initialFields: dataFormatter(data, 'EDIT', props),
+      //     onValid: data => dispatch(Update({
+      //       data: dataFormatter(data, 'SAVE_EDIT', props),
+      //       node,
+      //       callback: getList
+      //     })),
+      //   }
+      // }))
     }
 
     function handleDelete(data) {
@@ -99,29 +104,29 @@ const withBasePage = (params) => WrappedComponent => {
     WrappedComponent.name ||
     'Component'})`
 
-  BasePage.getInitialProps = async(ctx) => {
-    let componentProps = {}
-    const { store } = ctx
-    const { user } = store.getState().auth
-    if (user) {
-      const data = await api({
-        url: `/${node}?${queryString.stringify(getListRequestData(user))}`
-      }, ctx)
-      store.dispatch(getListRequestAction({ data, key: dataPropKey, request: false }))
-    }
-    if (WrappedComponent.getInitialProps) {
-      componentProps = await WrappedComponent.getInitialProps(ctx)
-    }
-    return componentProps
-  }
+  // BasePage.getInitialProps = async(ctx) => {
+  //   let componentProps = {}
+  //   const { store } = ctx
+  //   const { user } = store.getState().auth
+  //   if (user) {
+  //     const data = await api({
+  //       url: `/${node}?${queryString.stringify(getListRequestData(user))}`
+  //     }, ctx)
+  //     store.dispatch(getListRequestAction({ data, key: dataPropKey, request: false }))
+  //   }
+  //   if (WrappedComponent.getInitialProps) {
+  //     componentProps = await WrappedComponent.getInitialProps(ctx)
+  //   }
+  //   return componentProps
+  // }
 
-  const basePageSelector = createSelector(
-    state => state[reducer][dataPropKey],
-    state => state.auth.user,
-    (rows, user) => ({ rows, user })
-  )
+  // const basePageSelector = createSelector(
+  //   state => state[reducer][dataPropKey],
+  //   state => state.auth.user,
+  //   (rows, user) => ({ rows, user })
+  // )
 
-  return connect(basePageSelector)(BasePage)
+  return BasePage
 }
 
 export default withBasePage

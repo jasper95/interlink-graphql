@@ -7,7 +7,7 @@ import ApolloClient from 'apollo-client'
 import { onError } from 'apollo-link-error'
 import fetch from 'node-fetch'
 import jwt from 'jsonwebtoken'
-import { setNotification } from 'apollo/mutation'
+import { setToast } from 'apollo/mutation'
 
 let apolloClient = null
 
@@ -19,6 +19,7 @@ if (!process.browser) {
 function create(initialState, { getToken, fetchOptions }) {
   const errorLink = onError((err) => {
     const { graphQLErrors, networkError, operation } = err
+    console.log('err: ', err);
     const { cache } = operation.getContext()
     if (graphQLErrors) {
       graphQLErrors.forEach(({ message, path }) =>
@@ -29,13 +30,14 @@ function create(initialState, { getToken, fetchOptions }) {
     if (networkError) {
       console.log(
         `[Network error ${operation.operationName}]: ${networkError.message}`
-      );
+      )
+      if (networkError.statusCode === 400) {
+        const { message } = networkError.result
+        setToast(message, 'error')(cache)
+      }
     }
 
-    if (networkError.statusCode === 400) {
-      const { message } = networkError.result
-      setNotification(message, 'error')(cache)
-    }
+
   })
   const restAuthLink = setContext((_, { headers }) => {
     const token = getToken()
@@ -85,7 +87,7 @@ function create(initialState, { getToken, fetchOptions }) {
     ]),
     resolvers: {
       Mutation: {
-        resetKey(param, variables, { cache }) {
+        resetKey(_, variables, { cache }) {
           const { query, key } = variables
           cache.writeQuery({
             query,

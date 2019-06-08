@@ -3,7 +3,7 @@ import Page from 'components/Layout/Page'
 import Button from 'react-md/lib/Buttons/Button'
 import TextField from 'react-md/lib/TextFields/TextField'
 import Link from 'next/link';
-import { generateMutation, setNotification, applyUpdates } from 'apollo/mutation'
+import { generateMutation, setToast, applyUpdates } from 'apollo/mutation'
 import { useMutation } from 'react-apollo-hooks'
 import useForm from 'lib/hooks/useForm'
 import { getValidationResult, delay } from 'lib/tools'
@@ -21,9 +21,10 @@ const initialFields = {
   role: 'USER',
   company_name: ''
 }
+const SIGNUP_MUTATION = generateMutation({ url: '/signup' })
 
 export default function SignupPage(){
-  const [onSignup, signupState] = useMutation(generateMutation({ url: '/signup', keys: ['id'] }))
+  const [onSignup, signupState] = useMutation(SIGNUP_MUTATION)
   const [formState, formHandlers] = useForm({ initialFields, validator, onValid })
   const {
     onElementChange,
@@ -177,10 +178,10 @@ export default function SignupPage(){
         input: data,
       },
       update: applyUpdates(
-        setNotification('Account successfully registered. Please verify your email to login'),
-        () => delay(3000),
-        setNotification(null),
-        () => Router.push('/login')
+        setToast('Account successfully registered. Please verify your email to login'),
+        setToast0),
+        setToast(null),
+        setToastsh('/login')
       )
     })
   }

@@ -11,19 +11,18 @@ import Router from 'next/router'
 import cookie from 'js-cookie'
 import joi from 'joi'
 import { generateMutation } from 'apollo/mutation'
-
 import 'sass/pages/login.scss'
-
 
 const initialFields = {
   password: '',
   email: '',
   isShowPassword: false
 }
+const LOGIN_MUTATION = generateMutation({ keys: ['id', 'token'], url: '/login' })
 
 export default function LoginPage(props){
   const [formState, formHandlers] = useForm({ initialFields, validator, onValid })
-  const [onLogin, loginState] = useMutation(generateMutation({ keys: ['id', 'token'], url: '/login' }))
+  const [onLogin, loginState] = useMutation(LOGIN_MUTATION)
   const { verified } = props
   const {
     onElementChange,
