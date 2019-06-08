@@ -3,13 +3,9 @@ import { compose } from 'redux'
 import withAuth from 'lib/hocs/apolloAuth'
 import DateCell from 'components/DateCell'
 import ProfilePage, { profilePropsKeys, dataFormatter } from 'components/Profile/ProfilePage'
-import {
-  GetProfileData
-} from 'redux/profile/actions'
 import withBasePage from 'lib/hocs/basePage'
 import pick from 'lodash/pick'
-import { useQuery } from 'react-apollo-hooks'
-import { useAppData } from 'apollo/query'
+import { generateQueryById } from 'apollo/query'
 import gql from 'graphql-tag'
 
 const EXPERIENCE_QUERY = gql`
@@ -26,13 +22,9 @@ const EXPERIENCE_QUERY = gql`
 
 function Experience(props) {
   const { onDelete, onEdit } = props
-  const [appData] = useAppData()
-  const { auth } = appData
-  const { data } = useQuery(EXPERIENCE_QUERY, { variables: { user_id: auth.id } })
   return (
     <ProfilePage
       columns={getColumns()}
-      rows={data.experience || []}
       pageIcon='work'
       pageName='Experience'
       {...pick(props, profilePropsKeys)}
@@ -73,19 +65,22 @@ function Experience(props) {
   }
 }
 
-function getListRequestData(user) {
-  return { user_id: user.id, fields: ['id', 'position', 'start_date', 'end_date', 'company']}
-}
+const fields = ['id', 'position', 'start_date', 'end_date', 'company']
+// function getListRequestData(user) {
+//   return { user_id: user.id, fields}
+// }
 
 const basePageProps = {
-  getListRequestData,
+  // getListRequestData,
   node: 'experience',
-  dataPropKey: 'experiences',
   dialogPath: 'Experience',
   pageName: 'Experience',
-  reducer: 'profile',
-  getListRequestAction: GetProfileData,
-  dataFormatter 
+  dataFormatter,
+  listQuery: EXPERIENCE_QUERY,
+  detailsQuery: generateQueryById({
+    node: 'experience',
+    keys: fields
+  })
 }
 
 export default compose(

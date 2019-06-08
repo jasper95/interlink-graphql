@@ -7,7 +7,7 @@ import ApolloClient from 'apollo-client'
 import { onError } from 'apollo-link-error'
 import fetch from 'node-fetch'
 import jwt from 'jsonwebtoken'
-import { setToast } from 'apollo/mutation'
+import { setToast, setData } from 'apollo/mutation'
 
 let apolloClient = null
 
@@ -34,6 +34,7 @@ function create(initialState, { getToken, fetchOptions }) {
       if (networkError.statusCode === 400) {
         const { message } = networkError.result
         setToast(message, 'error')(cache)
+        setData('dialogProcessing', false)(cache)
       }
     }
 

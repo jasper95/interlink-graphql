@@ -5,11 +5,12 @@ import useForm from '../hooks/useForm'
 import omit from 'lodash/omit'
 import { useAppData } from 'apollo/query'
 
-const dialogProps = ['dialogId', 'dialogActionsRenderer', 'dialogTitleRenderer', 'title', 'isProcessing', 'dialogClass']
+const dialogProps = ['dialogId', 'dialogActionsRenderer', 'dialogTitleRenderer', 'title', 'dialogClass']
 const formProps =  ['initialFields', 'validator', 'customChangeHandler', 'onValid']
 export default () => (WrappedComponent) => {
   function Dialog(props) {
-    const [, setAppData] = useAppData()
+    const [appData, setAppData] = useAppData()
+    console.log('appData: ', appData.dialogProcessing);
     const [formState, formHandlers] = useForm(pick(props, formProps))
     return (
       <DialogLayout
@@ -17,6 +18,7 @@ export default () => (WrappedComponent) => {
         onCancel={() => {
           setAppData('dialog', null)
         }}
+        isProcessing={appData.dialogProcessing}
         {...pick(props, dialogProps)}
       >
         <WrappedComponent

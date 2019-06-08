@@ -1,5 +1,6 @@
 export default {
   toast: null,
   auth: null,
-  dialog: null
+  dialog: null,
+  dialogProcessing: false
 }

@@ -1,12 +1,9 @@
 import React from 'react'
-import {
-  ShowDialog,
-  Create,
-  Update,
-  Delete
-} from 'redux/app/actions'
 import pick from 'lodash/pick'
 import { useAppData } from 'apollo/query'
+import { useCreateNode, useUpdateNode, useDeleteNode } from 'apollo/mutation'
+import { useManualQuery } from 'apollo/query'
+import { useQuery } from 'react-apollo-hooks'
 
 const withBasePage = (params) => WrappedComponent => {
   const {
@@ -15,17 +12,24 @@ const withBasePage = (params) => WrappedComponent => {
     pageName,
     dialogPath,
     listQuery,
-    dataPropKey,
+    detailsQuery,
     dialogProps = {}
   } = params
   function BasePage(props) {
-    const [, setAppData] = useAppData()
+    const [appData, setAppData] = useAppData()
+    const { auth } = appData
+    const { data: listData, refetch } = useQuery(listQuery, { variables: { user_id: auth && auth.id } })
+    const [, detailsHandler] = useManualQuery(detailsQuery)
+    const [createNode] = useCreateNode({ node, callback: refetch })
+    const [updateNode] = useUpdateNode({ node, callback: refetch })
+    const [deleteNode] = useDeleteNode({ node, callback: refetch })
     return (
       <WrappedComponent
         onDelete={handleDelete}
-        onGetList={getList}
+        onGetList={refetch}
         onNew={handleNew}
         onEdit={handleEdit}
+        rows={listData[node] || []}
         {...pick(params, ['pageName', 'node', 'dataPropKey'])}
         {...props}
       />
@@ -39,92 +43,53 @@ const withBasePage = (params) => WrappedComponent => {
           dialogId: dialogPath,
           title: `New ${pageName}`,
           onValid: (data) => {
-
+            createNode({
+              variables: { input: dataFormatter(data, 'SAVE_CREATE', { user: auth }) },
+            })
           }
         }
       })
-      // dispatch(ShowDialog({
-      //   path: dialogPath,
-      //   props: {
-      //     ...dialogProps,
-      //     dialogId: dialogPath,
-      //     title: `New ${pageName}`,
-      //     onValid: (data) => dispatch(Create({
-      //       data: dataFormatter(data, 'SAVE_CREATE', props),
-      //       node,
-      //       callback: getList
-      //     }))
-      //   }
-      // }))
     }
 
     async function handleEdit(row) {
-      // const data = await api({
-      //   url: `/${node}/${row.id}`
-      // })
-      // dispatch(ShowDialog({
-      //   path: dialogPath,
-      //   props: {
-      //     ...dialogProps,
-      //     title: `Edit ${pageName}`,
-      //     initialFields: dataFormatter(data, 'EDIT', props),
-      //     onValid: data => dispatch(Update({
-      //       data: dataFormatter(data, 'SAVE_EDIT', props),
-      //       node,
-      //       callback: getList
-      //     })),
-      //   }
-      // }))
+      const response = await detailsHandler.onQuery({ variables: { id: row.id }})
+      const [data] = response[node] || []
+      if (data) {
+        setAppData('dialog', {
+          path: dialogPath,
+          props: {
+            ...dialogProps,
+            title: `Edit ${pageName}`,
+            initialFields: dataFormatter(data, 'EDIT', props),
+            onValid: (updatedData) => {
+              updateNode({
+                variables: { input: dataFormatter(updatedData, 'SAVE_EDIT', { user: auth }) },
+              })
+            }
+          }
+        })
+      }
     }
 
     function handleDelete(data) {
-      dispatch(ShowDialog({
+      setAppData('dialog', {
         path: 'Confirm',
         props: {
           title: 'Confirm Delete',
           message: 'Do you want to delete this item?',
-          onValid: () => dispatch(Delete({
-            data,
-            node,
-            callback: getList
-          }))
+          onValid: () => {
+            deleteNode({
+              variables: { input: data }
+            })
+          }
         }
-      }))
-    }
-  
-    function getList() {
-      const { user } = props
-      dispatch(getListRequestAction({
-        data: getListRequestData(user), key: dataPropKey, url: `/${node}`
-      }))
+      })
     }
   }
 
   BasePage.displayName = `withBasePage(${WrappedComponent.displayName ||
     WrappedComponent.name ||
     'Component'})`
-
-  // BasePage.getInitialProps = async(ctx) => {
-  //   let componentProps = {}
-  //   const { store } = ctx
-  //   const { user } = store.getState().auth
-  //   if (user) {
-  //     const data = await api({
-  //       url: `/${node}?${queryString.stringify(getListRequestData(user))}`
-  //     }, ctx)
-  //     store.dispatch(getListRequestAction({ data, key: dataPropKey, request: false }))
-  //   }
-  //   if (WrappedComponent.getInitialProps) {
-  //     componentProps = await WrappedComponent.getInitialProps(ctx)
-  //   }
-  //   return componentProps
-  // }
-
-  // const basePageSelector = createSelector(
-  //   state => state[reducer][dataPropKey],
-  //   state => state.auth.user,
-  //   (rows, user) => ({ rows, user })
-  // )
 
   return BasePage
 }

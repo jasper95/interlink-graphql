@@ -179,9 +179,9 @@ export default function SignupPage(){
       },
       update: applyUpdates(
         setToast('Account successfully registered. Please verify your email to login'),
-        setToast0),
+        () => delay(3000),
         setToast(null),
-        setToastsh('/login')
+        () => Router.push('/login')
       )
     })
   }
