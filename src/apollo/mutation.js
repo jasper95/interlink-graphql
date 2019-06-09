@@ -48,7 +48,8 @@ export function useNodeMutation(metadata = {}, options) {
     callback = () => {},
     method
   } = metadata
-  const query = generateMutation({ url: `/${node}`, method })
+  const mutationGenerator =  method === 'DELETE' ? deleteMutation : generateMutation
+  const query = mutationGenerator({ url: `/${node}`, method })
   const [, setAppData] = useAppData()
   const defaultOptions = {
     update: (cache) => {
@@ -66,6 +67,16 @@ export function useNodeMutation(metadata = {}, options) {
   }
 }
 
+export function deleteMutation({ keys = ['NoResponse'], url }) {
+  return gql`
+    mutation DeleteMutation($id: String) {
+      deleteNode(id: $id) 
+        @rest(type: "any" path: "${url}/{args.id}" method: "DELETE") {
+          ${keys.join(', ')}
+        }
+    }
+  `
+}
 
 export function generateMutation({ keys = ['NoResponse'], method = 'POST', url }) {
   return gql`

@@ -79,7 +79,7 @@ const withBasePage = (params) => WrappedComponent => {
           message: 'Do you want to delete this item?',
           onValid: () => {
             deleteNode({
-              variables: { input: data }
+              variables: { id: data.id }
             })
           }
         }
