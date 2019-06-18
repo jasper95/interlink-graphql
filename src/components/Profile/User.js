@@ -78,7 +78,7 @@ export default function UserProfile(props) {
           rows={educations}
           columns={[
             {
-              accessor: 'job_category',
+              accessor: 'job_category.name',
               title: 'Field of Study'
             },
             {

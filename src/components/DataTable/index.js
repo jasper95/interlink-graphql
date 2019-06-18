@@ -5,6 +5,7 @@ import TableRow from 'react-md/lib/DataTables/TableRow'
 import TableColumn from 'react-md/lib/DataTables/TableColumn'
 import TableHead from 'react-md/lib/DataTables/TableHeader'
 import Button from 'react-md/lib/Buttons/Button'
+import get from 'lodash/get'
 
 function DataTable(props) {
   const { rows, columns, onRowClick } = props;
@@ -74,7 +75,7 @@ function Row(props) {
   } else if (type === 'function') {
     children = fn(row)
   }else {
-    children = row[accessor]
+    children = get(row, accessor)
   }
   return (
     <TableColumn {...bodyProps}>{children}</TableColumn>

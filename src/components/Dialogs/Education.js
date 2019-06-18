@@ -30,10 +30,15 @@ function EducationDialog(props) {
         <label>Field of Study*</label>
         <Select
           isSearchable
+          id='job_category'
           getOptionLabel={(e) => e.name}
           getOptionValue={(e) => e.id}
-          onChange={value => onChange('job_category_id', value.id)}
+          onChange={value => {
+            onChange('job_category', value)
+            onChange('job_category_id', value.id)
+          }}
           options={data.job_category || []}
+          value={fields.job_category}
         />
         <TextFieldMessage
           errorText={errors.job_category_id}

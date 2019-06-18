@@ -19,7 +19,6 @@ if (!process.browser) {
 function create(initialState, { getToken, fetchOptions }) {
   const errorLink = onError((err) => {
     const { graphQLErrors, networkError, operation } = err
-    console.log('err: ', err);
     const { cache } = operation.getContext()
     if (graphQLErrors) {
       graphQLErrors.forEach(({ message, path }) =>

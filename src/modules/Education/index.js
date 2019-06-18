@@ -3,13 +3,9 @@ import { compose } from 'redux'
 import withAuth from 'lib/hocs/apolloAuth'
 import DateCell from 'components/DateCell'
 import ProfilePage, { profilePropsKeys, dataFormatter } from 'components/Profile/ProfilePage'
-import {
-  GetProfileData
-} from 'redux/profile/actions'
 import withBasePage from 'lib/hocs/basePage'
 import pick from 'lodash/pick'
-import { useQuery } from 'react-apollo-hooks'
-import { useAppData } from 'apollo/query'
+import { generateQueryById } from 'apollo/query'
 import gql from 'graphql-tag'
 
 const EDUCATION_QUERY = gql`
@@ -18,24 +14,21 @@ const EDUCATION_QUERY = gql`
       id,
       school
       job_category {
-        name
         id
+        name
       }
       start_date
       end_date
+      qualification
     }
   }
 `
 
 function Education(props) {
   const { onDelete, onEdit } = props
-  const [appData] = useAppData()
-  const { auth } = appData
-  const { data } = useQuery(EDUCATION_QUERY, { variables: { user_id: auth.id } })
   return (
     <ProfilePage
       columns={getColumns()}
-      rows={data.education || []}
       pageIcon='school'
       pageName='Education'
       {...pick(props, profilePropsKeys)}
@@ -45,7 +38,7 @@ function Education(props) {
   function getColumns() {
     return [
       {
-        accessor: 'job_category',
+        accessor: 'job_category.name',
         title: 'Field of Study'
       },
       {
@@ -76,19 +69,18 @@ function Education(props) {
   }
 }
 
-function getListRequestData(user) {
-  return { user_id: user.id, fields: ['id', 'job_category','job_category_id', 'start_date', 'end_date', 'qualification', 'school']}
-}
+const fields = ['id', 'job_category { id name }','start_date', 'end_date', 'qualification', 'school']
 
 const basePageProps = {
-  getListRequestData,
   node: 'education',
   pageName: 'Education',
   dialogPath: 'Education',
-  getListRequestAction: GetProfileData,
-  dataPropKey: 'educations',
-  reducer: 'profile',
-  dataFormatter
+  dataFormatter,
+  listQuery: EDUCATION_QUERY,
+  detailsQuery: generateQueryById({
+    node: 'education',
+    keys: fields
+  })
 }
 
 export default compose(

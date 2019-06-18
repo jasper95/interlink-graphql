@@ -73,7 +73,6 @@ export default function api(config, ctx = {}, redirectUnauthorized = true) {
 }
 
 export function formatError(response) {
-  // console.log('response: ', response);
   const { status } = response
   const error = { type: 'ERROR', payload: { message: '' }, status }
   if (status === 401) {

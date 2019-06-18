@@ -2,13 +2,9 @@ import React from 'react'
 import { compose } from 'redux'
 import withAuth from 'lib/hocs/apolloAuth'
 import ProfilePage, { profilePropsKeys, dataFormatter } from 'components/Profile/ProfilePage'
-import {
-  GetProfileData
-} from 'redux/profile/actions'
 import withBasePage from 'lib/hocs/basePage'
 import pick from 'lodash/pick'
-import { useQuery } from 'react-apollo-hooks'
-import { useAppData } from 'apollo/query'
+import { generateQueryById } from 'apollo/query'
 import gql from 'graphql-tag'
 
 const SKILL_QUERY = gql`
@@ -23,13 +19,9 @@ const SKILL_QUERY = gql`
 
 function Skill(props) {
   const { onEdit, onDelete } = props
-  const [appData] = useAppData()
-  const { auth } = appData
-  const { data } = useQuery(SKILL_QUERY, { variables: { user_id: auth.id } })
   return (
     <ProfilePage
       columns={getColumns()}
-      rows={data.skill || []}
       pageIcon='account_box'
       pageName='Skill'
       {...pick(props, profilePropsKeys)}
@@ -66,19 +58,16 @@ function Skill(props) {
   }
 }
 
-function getListRequestData(user) {
-  return { user_id: user.id, fields: ['id', 'name', 'level']}
-}
-
 const basePageProps = {
-  getListRequestData,
   dataFormatter,
   node: 'skill',
   dialogPath: 'Skill',
   pageName: 'Skill',
-  getListRequestAction: GetProfileData,
-  dataPropKey: 'skills',
-  reducer: 'profile'
+  listQuery: SKILL_QUERY,
+  detailsQuery: generateQueryById({
+    node: 'skill',
+    keys: ['id', 'name', 'level']
+  })
 }
 
 export default compose(

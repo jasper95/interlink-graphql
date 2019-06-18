@@ -10,7 +10,6 @@ const formProps =  ['initialFields', 'validator', 'customChangeHandler', 'onVali
 export default () => (WrappedComponent) => {
   function Dialog(props) {
     const [appData, setAppData] = useAppData()
-    console.log('appData: ', appData.dialogProcessing);
     const [formState, formHandlers] = useForm(pick(props, formProps))
     return (
       <DialogLayout
