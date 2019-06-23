@@ -34,10 +34,13 @@ export function getAddressOptions(field, fields) {
 }
 
 export function getAddressDescription({ province, barangay, municipality }) {
+  const { citymunDesc = ''} = municipalityOptions.find(e => e.citymunCode === municipality) || {}
+  const { brgyDesc = '' } = barangayOptions.find(e => e.brgyCode === barangay) || {}
+  const { provDesc = '' } = provinceOptions.find(e => e.provCode === province) || {}
   return {
-    barangay: barangayOptions.find(e => e.brgyCode === barangay).brgyDesc,
-    municipality: municipalityOptions.find(e => e.citymunCode === municipality).citymunDesc,
-    province: provinceOptions.find(e => e.provCode === province).provDesc,
+    barangay: brgyDesc,
+    municipality: citymunDesc,
+    province: provDesc,
   }
 }
 

@@ -28,7 +28,7 @@ function Page(props) {
   if (dialog && dialog.path) {
     Dialog = Dialogs[dialog.path]
   }
-
+  console.log(router)
   return (
     <>
       <Head>

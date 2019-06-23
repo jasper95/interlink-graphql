@@ -7,7 +7,6 @@ import withAuth from 'lib/hocs/apolloAuth'
 import Button from 'react-md/lib/Buttons/Button'
 import {
   ShowDialog,
-  Update,
   Upload
 } from 'redux/app/actions'
 import {
@@ -19,9 +18,14 @@ import {
 } from 'lib/tools'
 import { formatAddress } from 'components/Profile/User'
 import { useAppData } from 'apollo/query'
+import { useUpdateNode } from 'apollo/mutation'
 
 function AboutMe(props) {
-  const [appData] = useAppData()
+  const [appData, setAppData] = useAppData()
+  const [updateNode] = useUpdateNode({
+    node: 'system_user',
+    message: 'Profile details successfull updated'
+  })
   const { auth: user } = appData
   if (!user) {
     return null
@@ -67,24 +71,23 @@ function AboutMe(props) {
   )
 
   function handleUpdate() {
-    dispatch(ShowDialog({
+    setAppData('dialog', {
       path: 'AboutMe',
       props: {
         initialFields: formatISOToDate(user, ['birth_date'], 'YYYY-MM-DD'),
         title: 'Edit About Me',
         onValid: (data) => {
-          dispatch(Update({
-            data: {
-              ...formatDateToISO(data, ['birth_date'], 'YYYY-MM-DD'),
-              address_description: getAddressDescription(data)
-            },
-            node: 'user',
-            sucessMessage: 'Personal Details successfull updated',
-            callback: handleUpdateCallback
-          }))
+          updateNode({
+            variables: {
+              input: {
+                ...formatDateToISO(data, ['birth_date'], 'YYYY-MM-DD'),
+                address_description: getAddressDescription(data)
+              }
+            }
+          })
         }
       }
-    }))
+    })
   }
 
   function handleUploadResume() {
