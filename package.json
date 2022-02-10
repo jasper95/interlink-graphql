@@ -44,7 +44,7 @@
     "next-redux-saga": "^4.0.1",
     "next-redux-wrapper": "^3.0.0-alpha.2",
     "node-fetch": "^2.6.0",
-    "node-sass": "^4.11.0",
+    "node-sass": "^7.0.0",
     "nprogress": "0.2.0",
     "prop-types": "15.6.2",
     "qs": "^6.7.0",
